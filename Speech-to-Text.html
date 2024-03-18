@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ROBX24 Controlling System</title>
+    <link href="https://cdn.jsdelivr.net/npm/pico.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #74ebd5, #acb6e5);
+        }
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .header-container div {
+            font-weight: bold;
+            color: #003366; 
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 2rem;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(3, auto);
+            grid-template-rows: auto auto;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+            margin-top: 2rem;
+        }
+        .speech-recognition-button {
+            background-color: #5b8dff; 
+            color: white; 
+            padding: 15px 32px; 
+            text-align: center; 
+            text-decoration: none; 
+            display: inline-block; 
+            font-size: 16px; 
+            border: none; 
+            border-radius: 8px;
+            cursor: pointer; 
+            margin: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s;
+        }
+
+        .speech-recognition-button:hover {
+            background: #102c49;
+        }
+
+        #commandBox, #connectionStatus {
+            margin-top: 20px;
+            padding: 10px;
+            background: #e7f5ff;
+            border: 1px solid #b6dfff;
+            border-radius: 5px;
+        }
+        .title {
+            font-size: 1.5rem;
+            background: linear-gradient(to right, #6fd6ff, #5b8dff);
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .subtitle {
+            font-style: italic;
+            color: #003366;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-container">
+        <div>Smart Methods</div>
+        <div>Rawan Mohammed S AlGhmadi</div>
+        <div><img src="img/robot-icon.png" alt="Robot Icon" width="125" height="100" /></div>
+    </div>
+    <main class="container">
+        <h1 class="title">ROBX24 CONTROLLING SYSTEM</h1>
+        <p class="subtitle">Control your robot movement with your voice</p>
+        <button onclick="startRecognition()" class="speech-recognition-button">Press to Start Speech Recognition</button>
+    </div>
+        <div id="commandBox" >Your command will appear here...</div>
+
+<script>
+    
+    var recognition = new webkitSpeechRecognition() || new SpeechRecognition();
+    recognition.continuous = false; // Only capture single commands rather than continuous speech
+    recognition.lang = 'en-US'; // Set the language
+    recognition.interimResults = false; // We're only interested in the final result
+    recognition.maxAlternatives = 1; // We only need the top match
+
+    function startRecognition() {
+        recognition.start(); // Start listening for speech
+    }
+
+    recognition.onresult = function(event) {
+        var command = event.results[0][0].transcript; // Extract the recognized text
+        document.getElementById('commandBox').textContent = 'Recognized Command: ' + command; // Display it in the commandBox
+        saveCommand(command); // Save the command to the server
+};
+
+    recognition.onspeechend = function() {
+        recognition.stop(); // Stop listening when the user stops speaking
+    };
+
+    recognition.onerror = function(event) {
+        document.getElementById('commandBox').textContent = 'Error occurred in recognition: ' + event.error; // Display any errors
+    };
+
+    function startRecognition() {
+        recognition.start();
+    }
+    function saveCommand(command) {
+        fetch(`http://127.0.0.1/SaveCommand.php?command=${encodeURIComponent(command)}`)
+        .then(response => response.text())
+        .then(data => console.log(data))
+        .catch(error => console.log('Error:', error));
+    }
+</script>
+</body>
+</html>
